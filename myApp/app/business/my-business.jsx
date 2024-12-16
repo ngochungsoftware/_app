@@ -1,6 +1,5 @@
 import { View, Text, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { useUser } from '@clerk/clerk-expo'
 import { query } from 'firebase/database';
 import { collection, getDocs, where } from 'firebase/firestore';
 import {db} from './../../configs/FirebaseConfig'
@@ -9,7 +8,6 @@ import { useNavigation } from 'expo-router';
 import { Colors } from '../../constants/Color';
 export default function MyBusiness() {
 
-    const {user} = useUser();
     const [businessList,setBusinessList]= useState([]);
     const [loading,setLaoding] = useState(false);
     const navigation =useNavigation();
@@ -21,13 +19,13 @@ export default function MyBusiness() {
                 backgroundColor:Colors.PRIMARY
             },
         })
-        user&&GetUserBusiness()
-    },[user])
+        GetUserBusiness()
+    },[])
 
     const GetUserBusiness =async ()=>{
         setLaoding(true);
         setBusinessList([]);
-        const q= query(collection(db,'BusinessList'),where('userEmail','==',user?.primaryEmailAddress?.emailAddress));
+        const q= query(collection(db,'BusinessList'));
 
         const querySnapshot = await getDocs(q);
 

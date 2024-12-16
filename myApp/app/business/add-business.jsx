@@ -6,7 +6,6 @@ import RNPickerSelect from 'react-native-picker-select';
 import { collection, doc, getDocs, query, setDoc } from 'firebase/firestore';
 import {db,storage} from './../../configs/FirebaseConfig'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { useUser } from '@clerk/clerk-expo';
 import { Colors } from '../../constants/Color';
 
 export default function AddBusiness() {
@@ -19,7 +18,6 @@ export default function AddBusiness() {
   const [website,setWebsite] = useState();
   const [about,setAbout] = useState();
   const [category,setCategory] = useState();
-  const {user} = useUser();
   const [loading,setLoading]=useState(false);
 
   useEffect(()=>{
@@ -83,9 +81,6 @@ const saveBusinessDetail = async(imageUrl)=>{
     about:about,
     website:website,
     category:category,
-    username:user?.fullName,
-    userEmail:user?.primaryEmailAddress?.emailAddress,
-    userImage:user?.imageUrl,
     imageUrl:imageUrl
   })
   setLoading(false)
