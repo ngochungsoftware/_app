@@ -32,10 +32,7 @@ export default function Explore() {
   };
 
   const onGetOrderByCode = async () => {
-    if (!selectedOrderCode) {
-      console.log("Vui lòng nhập mã đơn hàng.");
-      return;
-    }
+
 
     try {
       setlistOrderDetail([]);
