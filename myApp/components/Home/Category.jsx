@@ -44,7 +44,7 @@ export default function Category({explore=false,onCategorySelect}) {
         }}>
       <Text style ={{
         marginTop:5, 
-        fontSize:20,
+        fontSize:18,
         fontFamily:'outfit-bold'
       }}>Category
       </Text>
