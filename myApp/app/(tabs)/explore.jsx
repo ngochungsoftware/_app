@@ -32,8 +32,6 @@ export default function Explore() {
   };
 
   const onGetOrderByCode = async () => {
-
-
     try {
       setlistOrderDetail([]);
 
