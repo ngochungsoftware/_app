@@ -31,12 +31,12 @@ export default function Explore() {
     }, 2000);
   };
 
-  const onGetOrderByCode = async () => {
+  const onGetOrderByCode = async (code) => {
     try {
       setlistOrderDetail([]);
 
       const response = await axios.get(
-        `${API_BASE_URL}/orders/by-code/${selectedOrderCode}`
+        `${API_BASE_URL}/orders/by-code/${code}`
       )
       if (response.status === 200) {
         setselectedOrder(response.data)
@@ -59,7 +59,7 @@ export default function Explore() {
         console.log("WebSocket connected!");
         stompClient.subscribe("/has-change/messages", (message) => {
           console.log("Received WebSocket message 1:", message.body);
-          onGetOrderByCode();
+          onGetOrderByCode(message.body);
         });
         stompClient.subscribe("/has-change-order-in-store-coder/messages", (message) => {
           console.log("Received WebSocket message 2:", message.body);
