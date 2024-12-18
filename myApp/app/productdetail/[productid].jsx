@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     View,
     Text,
@@ -12,12 +12,16 @@ import {
 import { useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Adjust the import based on your icon library
+import { API_BASE_URL } from "../../constants/API"
+import { AppContext } from "../../context/AppContext";
 
 const { width } = Dimensions.get('window');
+
 
 const defaultImage = 'https://via.placeholder.com/150'; // Define a default image URL
 
 export default function ProductDetailScreen() {
+    const { selectedOrder } = useContext(AppContext);
     const { productid } = useLocalSearchParams();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -66,6 +70,18 @@ export default function ProductDetailScreen() {
     //     );
     // }
 
+    // const onHandleAddToCart = async (product_detail_id) => {
+    //     const data = {
+    //         "orderId": selectedOrder.id,
+    //         "quantity": quantity,
+    //         "productDetailId": product_detail_id,
+    //         // "averageDiscountEventPercent": 8
+    //     }
+    //     await axios.post(`${API_BASE_URL}/order-details`, data).then(function (response) {
+    //         console.log(response)
+    //     })
+    // }
+
     useEffect(() => {
         const fetchInitialData = async () => {
             if (!productid) {
@@ -75,11 +91,11 @@ export default function ProductDetailScreen() {
             }
 
             try {
-                const productDetailResponse = await axios.get(`http://192.168.1.150:8080/api/v1/productDetails/product-detail-of-product/${productid}`);
+                const productDetailResponse = await axios.get(`${API_BASE_URL}/productDetails/product-detail-of-product/${productid}`);
                 setListProductDetail(productDetailResponse.data);
                 setPriceRange(calculatePriceRange(productDetailResponse.data));
 
-                const productResponse = await axios.get(`/product/${productid}`);
+                const productResponse = await axios.get(`${API_BASE_URL}/product/${productid}`);
                 setProduct(productResponse.data);
                 if (productResponse.data.eventDTOList && productResponse.data.eventDTOList.length > 0) {
                     setSalePercent(productResponse.data.eventDTOList[0].discountPercent);
@@ -166,9 +182,23 @@ export default function ProductDetailScreen() {
         }
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async() => {
         // Logic to add the selected product to the cart
         console.log('Add to cart functionality not implemented yet.');
+        if(selectedOrder?.id){
+            const data = {
+                "orderId": selectedOrder.id,
+                "quantity": quantity,
+                "productDetailId": productid,
+            }
+            await axios.post(`${API_BASE_URL}/order-details`, data).then(function (response) {
+                console.log(response)
+            })
+        }
+        else{
+            console.log("Chưa có order id")
+        }
+    
     };
 
     const renderPriceSection = () => {
@@ -357,7 +387,7 @@ export default function ProductDetailScreen() {
                     <View style={styles.actionButtonContainer}>
                         <TouchableOpacity
                             style={styles.addToCartButton}
-                            onPress={handleAddToCart}
+                            onPress={( ) => handleAddToCart()}
                         >
                             <Text style={styles.addToCartButtonText}>Thêm vào giỏ hàng</Text>
                         </TouchableOpacity>

@@ -7,8 +7,7 @@ import axios from "axios";
 import { AppContext } from "../../context/AppContext";
 import { Trash2, Plus, Minus } from "lucide-react-native";
 import Toast from 'react-native-toast-message';
-
-const API_BASE_URL = "http://192.168.1.150:8080/api/v1";
+import {API_BASE_URL} from "../../constants/API"
 let stompClient = null;
 
 export default function Explore() {
@@ -80,6 +79,16 @@ export default function Explore() {
       }
     );
   };
+  const deleteOrderDetail = async (order_detail_id) => {
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/order-details/${order_detail_id}`
+      );
+      onGetOrderByCode(selectedOrderCode);
+    } catch (error) {
+      console.error("Failed to update quantity", error);
+    }
+  }
 
 
   const updateQuantity = async (itemId, newQuantity) => {

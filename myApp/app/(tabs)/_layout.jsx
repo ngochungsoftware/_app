@@ -3,13 +3,11 @@ import React from 'react'
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Color'
-import { AppProvider } from '../../context/AppContext';
 import { NativeBaseProvider } from 'native-base';
 
 export default function TabLayout() {
   return (
     <NativeBaseProvider>
-      <AppProvider>
         <Tabs screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: Colors.PRIMARY
@@ -36,7 +34,6 @@ export default function TabLayout() {
             }} />
 
         </Tabs>
-      </AppProvider>
     </NativeBaseProvider>
   )
 }

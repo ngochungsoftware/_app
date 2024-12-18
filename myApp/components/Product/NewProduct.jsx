@@ -10,6 +10,7 @@ import {
     Dimensions
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import {API_BASE_URL} from "../../constants/API"
 
 export default function NewProduct() {
     const [products, setProducts] = useState([]);
@@ -36,7 +37,7 @@ export default function NewProduct() {
         const fetchProducts = async () => {
             try {
                 const response = await fetch(
-                    `http://192.168.1.150:8080/api/v1/productDetails/event?page=${currentPage}&size=${pageSize}`
+                    `${API_BASE_URL}/productDetails/event?page=${currentPage}&size=${pageSize}`
                 );
                 const data = await response.json();
                 setProducts(data.content || []);
