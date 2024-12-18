@@ -14,7 +14,9 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
-const baseURL = 'http://10.24.27.206:8080/api/v1';
+const baseURL = 'http://192.168.1.150:8080/api/v1';
+
+// con gi nưa ko bkhum
 
 export default function ProductScreen() {
   const navigation = useNavigation();

@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
     Image,
     ScrollView,
-    TouchableOpacity,
+    ActivityIndicator,
     StyleSheet,
-    Dimensions
+    Dimensions,
+    TouchableOpacity
 } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Adjust the import based on your icon library
 
 const { width } = Dimensions.get('window');
 
-export default function ProductDetailScreen() {
-    const route = useRoute();
-    const navigation = useNavigation();
-    const { id } = route.params;
+const defaultImage = 'https://via.placeholder.com/150'; // Define a default image URL
 
+export default function ProductDetailScreen() {
+    const { productid } = useLocalSearchParams();
     const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [listProductDetail, setListProductDetail] = useState([]);
     const [listColor, setListColor] = useState([]);
     const [listSize, setListSize] = useState([]);
@@ -31,38 +32,67 @@ export default function ProductDetailScreen() {
     const [priceRange, setPriceRange] = useState(null);
     const [salePercent, setSalePercent] = useState(0);
 
-    const defaultImage = "https://t4.ftcdn.net/jpg/04/99/93/31/360_F_499933117_ZAUBfv3P1HEOsZDrnkbNCt4jc3AodArl.jpg";
+    console.log('Product ID:', productid);
+
+    // useEffect(() => {
+    //     const fetchProductDetails = async () => {
+    //         try {
+    //             if (!productid) {
+    //                 console.error('No product ID provided');
+    //                 setLoading(false);
+    //                 return;
+    //             }
+
+    //             const response = await axios.get(
+    //                 `http://192.168.1.150:8080/api/v1/productDetails/${productid}`
+    //             );
+
+    //             setProduct(response.data);
+    //             setLoading(false);
+    //         } catch (error) {
+    //             console.error('Error fetching product details:', error);
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     fetchProductDetails();
+    // }, [productid]);
+
+    // if (loading) {
+    //     return (
+    //         <View style={styles.center}>
+    //             <ActivityIndicator size="large" color="#0000ff" />
+    //         </View>
+    //     );
+    // }
 
     useEffect(() => {
-        fetchProductDetails();
-        fetchProduct();
-    }, [id]);
-
-    const fetchProductDetails = async () => {
-        try {
-            const response = await axios.get(`/productDetails/product-detail-of-product/${id}`);
-            if (response?.data) {
-                setListProductDetail(response.data);
-                setPriceRange(calculatePriceRange(response.data));
+        const fetchInitialData = async () => {
+            if (!productid) {
+                console.error('No product ID provided');
+                setLoading(false);
+                return;
             }
-        } catch (error) {
-            console.error('Error fetching product details:', error);
-        }
-    };
 
-    const fetchProduct = async () => {
-        try {
-            const response = await axios.get(`/product/${id}`);
-            if (response?.data) {
-                setProduct(response.data);
-                if (response.data.eventDTOList && response.data.eventDTOList.length > 0) {
-                    setSalePercent(response.data.eventDTOList[0].discountPercent);
+            try {
+                const productDetailResponse = await axios.get(`http://192.168.1.150:8080/api/v1/productDetails/product-detail-of-product/${productid}`);
+                setListProductDetail(productDetailResponse.data);
+                setPriceRange(calculatePriceRange(productDetailResponse.data));
+
+                const productResponse = await axios.get(`/product/${productid}`);
+                setProduct(productResponse.data);
+                if (productResponse.data.eventDTOList && productResponse.data.eventDTOList.length > 0) {
+                    setSalePercent(productResponse.data.eventDTOList[0].discountPercent);
                 }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Error fetching product:', error);
-        }
-    };
+        };
+
+        fetchInitialData();
+    }, [productid]);
 
     useEffect(() => {
         if (listProductDetail.length > 0) {
@@ -119,20 +149,12 @@ export default function ProductDetailScreen() {
 
     const handleColorSelect = (color) => {
         setSelectedColor(color);
-        const filteredSizes = listProductDetail
-            .filter((item) => item.color.id === color.id)
-            .map((item) => item.size.code);
         setSelectedSize(null);
     };
 
     const handleSizeSelect = (size) => {
         setSelectedSize(size);
-        const filteredColors = listProductDetail
-            .filter((item) => item.size.id === size.id)
-            .map((item) => item.color.code);
     };
-
-
 
     const handleIncreaseQuantity = () => {
         setQuantity(prev => prev + 1);
@@ -142,6 +164,11 @@ export default function ProductDetailScreen() {
         if (quantity > 1) {
             setQuantity(prev => prev - 1);
         }
+    };
+
+    const handleAddToCart = () => {
+        // Logic to add the selected product to the cart
+        console.log('Add to cart functionality not implemented yet.');
     };
 
     const renderPriceSection = () => {
@@ -216,7 +243,21 @@ export default function ProductDetailScreen() {
         );
     };
 
-    if (!product) return <Text>Loading...</Text>;
+    if (loading) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
+    if (!product) {
+        return (
+            <View style={styles.center}>
+                <Text>No product found</Text>
+            </View>
+        );
+    }
 
     return (
         <ScrollView style={styles.container}>
@@ -304,11 +345,11 @@ export default function ProductDetailScreen() {
                         <Text style={styles.sectionTitle}>Số lượng</Text>
                         <View style={styles.quantityControl}>
                             <TouchableOpacity onPress={handleDecreaseQuantity}>
-                                <Icon name="remove-circle" size={30} color="black" />
+                                <Icon name="minus-circle" size={30} color="black" />
                             </TouchableOpacity>
                             <Text style={styles.quantityText}>{quantity}</Text>
                             <TouchableOpacity onPress={handleIncreaseQuantity}>
-                                <Icon name="add-circle" size={30} color="black" />
+                                <Icon name="plus-circle" size={30} color="black" />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -324,7 +365,7 @@ export default function ProductDetailScreen() {
                             style={styles.buyNowButton}
                             onPress={() => {
                                 handleAddToCart();
-                                navigation.navigate('Checkout');
+                                // navigation.navigate('Checkout'); // Ensure navigation is properly set up
                             }}
                         >
                             <Text style={styles.buyNowButtonText}>Mua ngay</Text>
@@ -334,7 +375,8 @@ export default function ProductDetailScreen() {
             </View>
         </ScrollView>
     );
-};
+}
+
 
 const styles = StyleSheet.create({
     container: {
@@ -466,5 +508,41 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    quantityText: {
+        fontSize: 18,
+        marginHorizontal: 10,
+    },
+    actionButtonContainer: {
+        flexDirection: 'row',
+        marginTop: 20,
+    },
+    addToCartButton: {
+        flex: 1,
+        backgroundColor: 'orange',
+        padding: 15,
+        marginRight: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    addToCartButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    buyNowButton: {
+        flex: 1,
+        backgroundColor: 'green',
+        padding: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    buyNowButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });

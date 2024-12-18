@@ -9,7 +9,7 @@ import {
     StyleSheet,
     Dimensions
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
 export default function NewProduct() {
     const [products, setProducts] = useState([]);
@@ -19,22 +19,24 @@ export default function NewProduct() {
     const [pageSize] = useState(10);
     const [totalElement, setTotalElement] = useState(0);
 
+    const router = useRouter();
+
     const windowWidth = Dimensions.get('window').width;
     const cardWidth = (windowWidth - 30) / 2;
-
 
     const formatToVND = (priceInUSD) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(priceInUSD);
     };
 
-
-    const navigation = useNavigation();
+    const navigateToProductDetail = (productid) => {
+        router.push(`/productdetail/${productid}`);
+    };
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const response = await fetch(
-                    `http://10.24.27.206:8080/api/v1/productDetails/event?page=${currentPage}&size=${pageSize}`
+                    `http://192.168.1.150:8080/api/v1/productDetails/event?page=${currentPage}&size=${pageSize}`
                 );
                 const data = await response.json();
                 setProducts(data.content || []);
@@ -56,11 +58,6 @@ export default function NewProduct() {
             </View>
         );
     }
-
-    const navigateToProductDetail = (productId) => {
-        navigation.navigate('productDetail', { productId });
-    };
-
 
     return (
         <ScrollView style={styles.container}>
@@ -113,7 +110,7 @@ export default function NewProduct() {
                             <TouchableOpacity
                                 style={styles.addToCartButton}
                                 activeOpacity={0.7}
-                                onPress={() => navigateToProductDetail(item.productId)} // Navigate when button is pressed
+                                onPress={() => navigateToProductDetail(item.productId)}
                             >
                                 <Text style={styles.addToCartText}>Add to Cart</Text>
                             </TouchableOpacity>
